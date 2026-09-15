@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; object-src 'none'; base-uri 'none'">
+<title>Spese Casa</title>
+<meta name="description" content="Budget di casa: entrate, uscite e saldo mese per mese. I dati restano sul telefono.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Spese Casa">
+<meta name="theme-color" content="#14213a">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="stylesheet" href="app.css">
+<script src="core.js" defer></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+
+<header class="barra">
+  <div class="barra-riga">
+    <label class="anno-pill"><span class="vh">Anno</span><select id="anno"></select></label>
+    <h1>Spese Casa</h1>
+    <button type="button" id="btnModifica" class="barra-bottone" data-az="modifica" aria-pressed="false">Modifica</button>
+  </div>
+</header>
+
+<main>
+  <!-- ============ MESE ============ -->
+  <section id="tab-mese" aria-labelledby="meseTitolo">
+    <div class="avviso-home" id="avvisoHome" hidden>
+      <p><b>Installala sull'iPhone</b><br>Tocca <svg class="ico-condividi" viewBox="0 0 24 24" aria-label="Condividi"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M7 10H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1"/></svg> e poi <b>Aggiungi alla schermata Home</b>: si apre a schermo intero e funziona anche senza rete.</p>
+      <button type="button" data-az="chiudi-avviso" aria-label="Chiudi avviso">✕</button>
+    </div>
+
+    <div class="mese-nav">
+      <button type="button" class="freccia-nav" data-az="mese-prec" aria-label="Mese precedente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h2 id="meseTitolo"><span id="meseNome"></span> <span id="meseAnno" class="mut"></span></h2>
+      <button type="button" class="freccia-nav" data-az="mese-succ" aria-label="Mese successivo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Scegli il mese"></div>
+
+    <div class="card saldo-card">
+      <div class="saldo-testa"><span class="etichetta">Saldo del mese</span><span id="statoMese" class="stato"></span></div>
+      <div class="hero" id="saldoMese">€0</div>
+      <div class="saldo-split">
+        <div><span class="marca in" aria-hidden="true"></span>Entrate <b id="totIn">€0</b></div>
+        <div><span class="marca out" aria-hidden="true"></span>Uscite <b id="totOut">€0</b></div>
+      </div>
+      <div class="barra-uscite" aria-hidden="true"><div id="barraUscite"></div></div>
+      <p class="nota" id="notaBarra"></p>
+    </div>
+
+    <div class="gruppo">
+      <div class="gruppo-testa"><h3><span class="marca in" aria-hidden="true"></span>Entrate</h3><span id="subIn" class="sub"></span></div>
+      <div class="card lista" id="listaIn"></div>
+      <form class="aggiungi" data-sez="in" autocomplete="off">
+        <input name="nome" type="text" placeholder="Nuova entrata (es. Tredicesima)" maxlength="40" enterkeyhint="done" autocapitalize="sentences" aria-label="Nome della nuova entrata">
+        <button type="submit">Aggiungi</button>
+      </form>
+    </div>
+
+    <div class="gruppo">
+      <div class="gruppo-testa"><h3><span class="marca out" aria-hidden="true"></span>Uscite</h3><span id="subOut" class="sub"></span></div>
+      <div class="card lista" id="listaOut"></div>
+      <form class="aggiungi" data-sez="out" autocomplete="off">
+        <input name="nome" type="text" placeholder="Nuova uscita (es. Assicurazione)" maxlength="40" enterkeyhint="done" autocapitalize="sentences" aria-label="Nome della nuova uscita">
+        <button type="submit">Aggiungi</button>
+      </form>
+    </div>
+
+    <button type="button" class="bottone-secondario" id="btnCopia" data-az="copia" hidden></button>
+  </section>
+
+  <!-- ============ ANNO ============ -->
+  <section id="tab-anno" hidden aria-labelledby="annoTitolo">
+    <h2 class="titolo-tab" id="annoTitolo">Anno <span class="anno-corrente"></span></h2>
+    <div class="kpi" id="kpi"></div>
+
+    <h3 class="sezione">Mese per mese</h3>
+    <div class="card mesi" id="listaMesi"></div>
+
+    <h3 class="sezione">Tutte le voci</h3>
+    <div class="tab-wrap card"><table id="tabella" class="tabella"></table></div>
+    <p class="nota">Scorri di lato per vedere tutti i mesi · tocca un importo per modificarlo.</p>
+  </section>
+
+  <!-- ============ BACKUP ============ -->
+  <section id="tab-dati" hidden aria-labelledby="datiTitolo">
+    <h2 class="titolo-tab" id="datiTitolo">Backup e dati</h2>
+    <div class="card menu">
+      <button type="button" class="menu-riga" data-az="backup">
+        <span class="menu-ico" aria-hidden="true">💾</span>
+        <span class="menu-testo"><b>Salva backup</b><small>Salvalo su File o mandalo al Mac con AirDrop</small></span>
+      </button>
+      <label class="menu-riga" for="fileBackup">
+        <span class="menu-ico" aria-hidden="true">📂</span>
+        <span class="menu-testo"><b>Carica backup</b><small>Anche quelli fatti con la versione per computer</small></span>
+      </label>
+      <button type="button" class="menu-riga" data-az="csv">
+        <span class="menu-ico" aria-hidden="true">📊</span>
+        <span class="menu-testo"><b>Esporta CSV <span class="anno-corrente"></span></b><small>Da aprire con Excel o Numbers</small></span>
+      </button>
+    </div>
+    <p class="nota" id="ultimoBackup"></p>
+
+    <div class="card menu">
+      <button type="button" class="menu-riga pericolo" data-az="azzera">
+        <span class="menu-ico" aria-hidden="true">↺</span>
+        <span class="menu-testo"><b>Azzera importi <span class="anno-corrente"></span></b><small>Le voci restano, gli importi tornano a zero</small></span>
+      </button>
+    </div>
+
+    <div class="card info">
+      <p>🔒 I dati restano solo su questo telefono: nessun invio online.</p>
+      <p id="statoArchivio"></p>
+      <p class="mut" id="versione">Versione 1.0</p>
+    </div>
+    <input type="file" id="fileBackup" class="vh" accept=".json,application/json" tabindex="-1">
+  </section>
+</main>
+
+<nav class="tabbar" aria-label="Sezioni">
+  <button type="button" data-az="tab" data-tab="mese" class="attivo" aria-current="page">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span>Mese</span>
+  </button>
+  <button type="button" data-az="tab" data-tab="anno">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M12 20V5M19 20v-5"/></svg><span>Anno</span>
+  </button>
+  <button type="button" data-az="tab" data-tab="dati">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m-4-4 4 4 4-4"/><path d="M4.5 15v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg><span>Backup</span>
+  </button>
+</nav>
+
+<dialog id="dlg" aria-labelledby="dlgTitolo">
+  <form method="dialog" class="dlg">
+    <h2 id="dlgTitolo"></h2>
+    <p id="dlgTesto"></p>
+    <input id="dlgCampo" type="text" maxlength="40" autocomplete="off" enterkeyhint="done" aria-labelledby="dlgTitolo">
+    <div class="dlg-bottoni">
+      <!-- OK viene prima nel codice: è il bottone che parte premendo Invio nel campo -->
+      <button type="submit" value="ok" id="dlgOk" class="primario">OK</button>
+      <button type="submit" value="annulla" id="dlgAnnulla">Annulla</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

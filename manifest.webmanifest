@@ -1,0 +1,18 @@
+{
+  "id": "./",
+  "name": "Spese Casa",
+  "short_name": "Spese Casa",
+  "description": "Budget di casa: entrate, uscite e saldo mese per mese. I dati restano sul telefono.",
+  "lang": "it",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c111b",
+  "theme_color": "#14213a",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
